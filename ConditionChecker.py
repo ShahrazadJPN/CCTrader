@@ -280,7 +280,7 @@ class ConditionChecker(Information):
             order_size = int(purchasable_btc)
             order_price = self.current_price
 
-            self.order_maker.parent_order_maker(order_side, order_size, order_price, self.balance)
+            self.order_maker.ifdoco_order_maker(order_side, order_size, order_price, self.balance)
         else:
             pass
 

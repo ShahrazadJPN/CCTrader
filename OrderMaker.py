@@ -76,17 +76,18 @@ class OrderMaker(Information):
 
             return int(bid_price + 10)
 
-    def create_ifdoco_order(self, first_side, size, limit_price, profit_price, loss_price):
+    def ifdoco_order_maker(self, first_side, size, limit_price, balance):
         """
         IFDOCOオーダーを発注する
         取引の要
         :param first_side:
         :param size:
         :param limit_price:
-        :param profit_price:
-        :param loss_price:
+
         :return:
         """
+
+        data = self.order_base_maker(first_side, limit_price)
 
         opposite_side = 'sell' if first_side == 'buy' else 'buy'
         uniq_id = int(time.time())
@@ -95,57 +96,21 @@ class OrderMaker(Information):
             'contingencyType': 'OneTriggersTheOther',
             'clOrdLinkID': uniq_id,
         })
-        self.bitmex.create_limit_order(self.product, opposite_side, size, profit_price, {
+        self.bitmex.create_limit_order(self.product, opposite_side, size, data['profit_line'], {
             'contingencyType': 'OneCancelsTheOther',
             'clOrdLinkID': uniq_id,
         })
-        self.bitmex.create_order(self.product, 'StopLimit', opposite_side, size, loss_price, {
+        self.bitmex.create_order(self.product, 'StopLimit', opposite_side, size, data['loss_line'], {
             'contingencyType': 'OneCancelsTheOther',
-            'stopPx': loss_price,
+            'stopPx': data['loss_line'],
             'orderQty': size,
-            'price': loss_price,
+            'price': data['loss_line'],
             'clOrdLinkID': uniq_id,
         })
-    
-    def parent_order_maker(self, order_side, order_size, order_price, balance):
 
-        data = self.order_base_maker(order_side, order_price)
-
-        buy_btc = self.api.sendparentorder(
-                                     order_method="IFDOCO",
-                                     parameters=[{
-                                         "product_code": self.product,
-                                         "condition_type": "LIMIT",
-                                         "side": order_side,
-                                         "price": order_price,
-                                         "size": order_size,
-                                         'time_in_force': 'IOC'
-                                     },
-                                         {
-                                             "product_code": self.product,
-                                             "condition_type": "LIMIT",
-                                             "side": data['execution_side'],  # 決済用
-                                             "price": data['profit_line'],
-                                             "size": order_size  # 所持しているビットコインの数量を入れる
-                                         },
-                                         {
-                                             "product_code": self.product,
-                                             "condition_type": "STOP",  # ストップ注文
-                                             "side": data['execution_side'],
-                                             "price": 0,  #
-                                             "trigger_price": data['loss_line'],
-                                             "size": order_size
-                                         }]
-
-                                     )
-
-        print("ordered: " + order_side, str(order_size) + "BTC at the price of " + str(order_price))
-
-        self.recorder.balance_recorder(balance, order_price)
-        print(buy_btc)
+        print("ordered: " + first_side, str(first_side) + "BTC at the price of " + str(limit_price))
+        self.recorder.balance_recorder(balance, limit_price)
         time.sleep(1)
-
-        return buy_btc
 
     def order_base_maker(self, order_side, order_price):
 
