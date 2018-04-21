@@ -17,7 +17,7 @@ if __name__ == '__main__':
                 c.current_balance_getter()
                 c.current_price_getter()
                 count += 1
-            elif count % 15 == 0:
+            elif count % 10 == 0:
                 c.order_actually_dead_checker()  # checks orders if they are still available or not
                 time.sleep(3)                 # avoid too many request
                 print('slept a bit to avoid making too many requests')
@@ -37,10 +37,13 @@ if __name__ == '__main__':
                 c.order_information_checker()   # 全ての条件をクリアしたら、取引を行う
 
         except requests.exceptions.HTTPError:
-            time.sleep(5)
-        except ccxt.base.errors.DDoSProtection:
-            print('too many requests made, sleep for 7 secs')
-            time.sleep(7)
+            print('ignore this')
+            time.sleep(15)
+
+        except ccxt.BaseError:
+            print('DDOS Error')
+            time.sleep(15)
+
         except Exception:
-            time.sleep(3)
+            time.sleep(5)
             traceback.print_exc()
