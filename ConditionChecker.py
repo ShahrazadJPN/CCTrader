@@ -26,8 +26,8 @@ class ConditionChecker(Information):
         self.ewma_1day = self.df_tail['long'].iloc[0]
         self.ewma_6hours = self.df_tail['short'].iloc[0]
 
-        self.best_bid = 0
-        self.best_ask = 0
+        self.short_gradient = 0
+        self.long_gradient = 0
 
         self.order_side = 'buy/sell'  # Will be buy or sell
 
@@ -64,13 +64,13 @@ class ConditionChecker(Information):
         self.current_balance_getter()
         current_price = self.current_price
 
-        if ((current_price > self.ewma_1min > self.ewma_5mins) or
-           (self.ewma_5mins > self.ewma_1min and current_price > self.ewma_1min)):
+        if ((current_price > self.ewma_6hours > self.ewma_1day) or
+           (self.ewma_1day > self.ewma_6hours and current_price > self.ewma_6hours)):
             market = "UP"
             self.order_side = "buy"
 
-        elif ((current_price < self.ewma_1min < self.ewma_5mins) or
-                (self.ewma_1min > self.ewma_5mins and self.ewma_1min > current_price)):
+        elif ((current_price < self.ewma_6hours < self.ewma_1day) or
+                (self.ewma_6hours > self.ewma_1day and self.ewma_6hours > current_price)):
             market = "DOWN"
             self.order_side = "sell"
 
@@ -92,7 +92,8 @@ class ConditionChecker(Information):
         self.ewma_6hours = self.df_tail['short'].iloc[0]
         self.ewma_1day = self.df_tail['long'].iloc[0]
 
-        self
+        self.long_gradient = self.trade_history.grad.tail(1)['long'].iloc[0]
+        self.short_gradient = self.trade_history.grad.tail(1)['short'].iloc[0]
 
     def board_status_checker(self):
         """
@@ -111,12 +112,12 @@ class ConditionChecker(Information):
 
         positions = self.bitmex.private_get_position()
 
-        if not positions:   # ポジションなし
+        if not positions:                     # ポジションなし
             self.signal = True
             self.positioning = False
-        else:                   # ポジションあり
+        else:                                  # ポジションあり
             self.signal = False
-            self.positioning = True  # 購入サインを消し、ポジション有のフラグを立てる
+            self.positioning = True              # 購入サインを消し、ポジション有のフラグを立てる
 
         self.positions = positions
 
@@ -169,6 +170,7 @@ class ConditionChecker(Information):
             ordered_time = self.orders[0]['datetime']        # 注文を入れた時刻
             ordered_time = ordered_time.replace("T", " ")
             ordered_time = ordered_time.replace("Z", "")
+            ordered_time = ordered_time / 1000          # milliseconds
 
             if ordered_time.find(".") == -1:
                 ordered_time = datetime.strptime(ordered_time, '%Y-%m-%d %H:%M:%S')

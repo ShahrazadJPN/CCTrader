@@ -12,66 +12,33 @@ class OrderMaker(Information):
         super().__init__()
         self.recorder = Recorder()
 
+    def oco_order_maker(self, position_side, position_size, position_price):
+
+        data = self.order_base_maker(position_side, position_price)
+        uniq_id = time.time()
+
+        self.bitmex.create_limit_order(self.product, data['opposite_side'], position_size, data['profit_line'], {
+            'contingencyType': 'OneCancelsTheOther',
+            'clOrdLinkID': uniq_id,
+        })
+        self.bitmex.create_order(self.product, 'StopLimit', data['opposite_side'], position_size, data['loss_line'], {
+            'contingencyType': 'OneCancelsTheOther',
+            'stopPx': data['loss_line'],
+            'orderQty': position_size,
+            'price': data['loss_line'],
+            'clOrdLinkID': uniq_id,
+        })
+
     def cancel_parent_order(self, order_id):
         """
         Nomen est omen
         :param order_id:
         :return:
         """
-        self.api.cancelparentorder(product_code=self.product,
-                                   parent_order_acceptance_id=order_id)
-        time.sleep(2)
 
-    def profit_price_decider(self, order_side, order_price):
+        self.bitmex.cancel_order(order_id)
 
-        """
-        発注する際の利確ラインを決定する
-        :return:
-        """
-
-        self.orderbook_getter()
-
-        ask_size = 0
-        ask_price = 0
-
-        bid_size = 0
-        bid_price = 0
-
-        default_target = 300
-
-        bottom_line = 400  # 最低でもこの価格までは利確を待つ
-        upper_line = 1200  # 最高でもこの価格までで利確する
-
-        if order_side == "buy":
-
-            for ask in asks:
-                if (bottom_line <= ask['price'] - order_price <= upper_line) and (ask['_size'] >= ask_size):
-                    ask_size = ask['_size']
-                    ask_price = ask['price']
-                    if ask_size >= 2:
-                        break
-
-            if ask_price == 0:
-                ask_price = order_price + default_target
-            elif -100 <= int(order_price - ask_price) <= 100:
-                ask_price += 200
-
-            return int(ask_price - 10)
-
-        elif order_side == "sell":
-            for bid in bids:
-                if (bottom_line <= order_price - bid['price'] <= upper_line) and (bid['_size'] >= bid_size):
-                    bid_size = bid['_size']
-                    bid_price = bid['price']
-                    if bid_size >= 2:
-                        break
-
-            if bid_price == 0:
-                bid_price = order_price - default_target
-            elif -100 <= int(order_price - bid_price) <= 100:
-                bid_price -= 200
-
-            return int(bid_price + 10)
+        time.sleep(1)
 
     def ifdoco_order_maker(self, first_side, size, order_price, balance):
         """
@@ -84,20 +51,22 @@ class OrderMaker(Information):
         :return:
         """
 
+        order_price = order_price - 3 if first_side == 'buy' else order_price + 3
+
         data = self.order_base_maker(first_side, order_price)
 
         opposite_side = 'sell' if first_side == 'buy' else 'buy'
         uniq_id = int(time.time())
 
-        self.bitmex.create_limit_order(self.product, first_side, size, order_price, {
+        self.bitmex.create_limit_order(self.product, first_side, size, order_price, {           # first order
             'contingencyType': 'OneTriggersTheOther',
             'clOrdLinkID': uniq_id,
         })
-        self.bitmex.create_limit_order(self.product, opposite_side, size, data['profit_line'], {
+        self.bitmex.create_limit_order(self.product, opposite_side, size, data['profit_line'], {    # profit order
             'contingencyType': 'OneCancelsTheOther',
             'clOrdLinkID': uniq_id,
         })
-        self.bitmex.create_order(self.product, 'StopLimit', opposite_side, size, data['loss_line'], {
+        self.bitmex.create_order(self.product, 'StopLimit', opposite_side, size, data['loss_line'], {   # loss order
             'contingencyType': 'OneCancelsTheOther',
             'stopPx': data['loss_line'],
             'orderQty': size,
@@ -105,12 +74,13 @@ class OrderMaker(Information):
             'clOrdLinkID': uniq_id,
         })
 
-        print("ordered: " + first_side, str(first_side) + "BTC at the price of " + str(order_price))
-        self.recorder.balance_recorder(balance, order_price)
+        print("ordered: " + str(first_side) + "BTC at the price of " + str(order_price))
+        self.recorder.balance_recorder(balance, order_price, uniq_id)
         time.sleep(1)
 
     def order_base_maker(self, order_side, order_price):
 
+        profit = None
         loss = None
         opposite = None
 
@@ -118,15 +88,15 @@ class OrderMaker(Information):
 
             opposite = "sell"
 
-            loss = int(order_price - self.lost_price)  # 同上、損切ライン
+            profit = float(order_price + self.profit_price)
+            loss = float(order_price - self.lost_price)  # 同上、損切ライン
 
         elif order_side == "sell":
 
             opposite = "buy"
 
-            loss = int(order_price + self.lost_price)  # 同上、損切ライン
-
-        profit = self.profit_price_decider(order_side, order_price)
+            profit = float(order_price - self.profit_price)
+            loss = float(order_price + self.lost_price)  # 同上、損切ライン
 
         data = {'execution_side': opposite, 'loss_line': loss, 'profit_line': profit}
 

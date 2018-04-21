@@ -9,40 +9,25 @@ class Recorder(Information):
     def __init__(self):
         super().__init__()
 
-    def market_recorder(self, product, path):
+    def market_recorder(self, path):
 
-        ticker = self.api.ticker(product_code=product)
-        board = self.api.board(product_code=product)
+        current_price = self.bitmex.fetch_ticker(symbol=self.product)['last']
 
-        time = ticker['timestamp']
-        last_price = ticker['ltp']  # 最終取引値 -> 値動きの判断に利用する
-        mid_price = board['mid_price']
+        time_ = time.time()
 
-        time = time.replace("T", " ")
+        print(time_)
 
-        if time.find(".") == - 1:
-            tdatetime = dt.strptime(time, '%Y-%m-%d %H:%M:%S')
-            tdatetime = tdatetime.timestamp()
-        else:
-            tdatetime = dt.strptime(time, '%Y-%m-%d %H:%M:%S.%f')
-            tdatetime = tdatetime.timestamp()
-
-        time = tdatetime
-
-        print(time)
-
-        w = pd.DataFrame([[time, last_price, mid_price]])  # 取得したティッカーをデータフレームに入れる
+        w = pd.DataFrame([[time_, current_price, current_price]])  # 取得したティッカーをデータフレームに入れる
 
         w.to_csv(path, index=False, encoding="utf-8", mode='a', header=False)  # append to the CSV
 
-    def balance_recorder(self, balance, order_price):
+    def balance_recorder(self, balance, order_price, time_):
 
-        time = self.api.ticker(product_code=self.product)['timestamp']
-        time = time.replace("T", " ")
+        time_ = dt.fromtimestamp(time_)
 
-        w = pd.DataFrame([[balance, time, order_price]])
+        w = pd.DataFrame([[balance, time_, order_price]])
 
-        w.to_csv(self.recording_path, index=False, encoding="utf-8",mode='a', header=False)    # append to the CSV
+        w.to_csv(self.recording_path, index=False, encoding="utf-8", mode='a', header=False)    # append to the CSV
 
         print("資産：", str(balance), "売買価格：", str(order_price))
 
@@ -53,8 +38,8 @@ if __name__ == '__main__':
 
     while True:
         try:
-            rec.market_recorder(rec.product, rec.path)  #
-            time.sleep(0.5)
+            rec.market_recorder(rec.path)  #
+            time.sleep(300)                             # every 5 mins
         except:
             time.sleep(2)
             import traceback

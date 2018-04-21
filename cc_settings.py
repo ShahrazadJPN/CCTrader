@@ -11,7 +11,7 @@ class Settings:
         self.product = "BTC/USD"                # product code
         self.lost_price = 30                    # loss contract price line
         self.cancelling_line = 10               # 現在価格と注文価格の差がこれより大きくなったらwaiting_timeを変更する
-        self.default_waiting_time = 600         # waiting time till cancelling orders
+        self.default_waiting_time = 900         # waiting time till cancelling orders
         self.profit_price = 12                  # profit contract price line
         self.spread_limit = 0.5                 # spread allowance limit
         self.starting_time_from = 2160          # staring time from now for ohlcv fetching, in minutes

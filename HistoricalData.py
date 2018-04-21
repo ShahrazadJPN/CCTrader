@@ -33,9 +33,6 @@ class HistoricalData(Information):
         self.fetchdata.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
         self.fetchdata['datetime'] = self.fetchdata['timestamp'].apply(lambda x: datetime.fromtimestamp(float(x/1000)))
 
-        self.grad = pd.DataFrame()
-        self.ewma = pd.DataFrame()
-
         self.ewma['long'] = self.fetchdata['close'].ewm(self.long_period, self.long_period, adjust=True).mean()
         self.ewma['short'] = self.fetchdata['close'].ewm(self.short_period, self.short_period, adjust=True).mean()
 

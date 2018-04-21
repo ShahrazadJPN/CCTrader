@@ -9,7 +9,7 @@ if __name__ == '__main__':
         while True:
             c.board_status_checker()          # checks board status
             c.market_reader()                 # gets latest chart and market data
-            c.order_checker()                 # checks if there's an orders
+            c.order_checker()                 # checks if there's an orders, and gets order id
             c.position_checker()              # checks positions
             c.only_position_checker()         # checks positions without orders
             c.order_actually_dead_checker()   # checks orders if they are still available or not
