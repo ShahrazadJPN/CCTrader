@@ -29,6 +29,8 @@ class OrderMaker(Information):
             'clOrdLinkID': uniq_id,
         })
 
+        time.sleep(2)
+
     def cancel_parent_order(self, order_id):
         """
         Nomen est omen

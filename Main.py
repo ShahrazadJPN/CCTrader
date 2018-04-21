@@ -17,7 +17,7 @@ if __name__ == '__main__':
                 c.current_balance_getter()
                 c.current_price_getter()
                 count += 1
-            elif count % 10 == 0:
+            elif count % 5 == 0:
                 c.order_actually_dead_checker()  # checks orders if they are still available or not
                 time.sleep(1)                 # avoid too many request
                 print('slept a bit to avoid making too many requests')
@@ -37,8 +37,8 @@ if __name__ == '__main__':
                 c.order_information_checker()   # 全ての条件をクリアしたら、取引を行う
 
         except ccxt.BaseError:
-            print('DDOS Error')
-            time.sleep(15)
+            print('Market Too Busy')
+            time.sleep(5)
 
         except Exception:
             time.sleep(5)
