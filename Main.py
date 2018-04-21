@@ -11,7 +11,7 @@ if __name__ == '__main__':
     while True:
         try:
             st = time.time()
-            c.board_status_checker()          # checks board status
+            c.board_status_checker()          # che;:::::::::::::/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\4r89e bcks board status
             if count == 0:
                 c.renew_chart_data()
                 c.current_balance_getter()
@@ -21,7 +21,7 @@ if __name__ == '__main__':
                 count = 0
             elif count % 5 == 0:
                 c.order_actually_dead_checker()  # checks orders if they are still available or not
-                time.sleep(5)                 # avoid too many request
+                time.sleep(3)                 # avoid too many request
                 print('slept a bit to avoid making too many requests')
                 count += 1
             else:
@@ -36,10 +36,6 @@ if __name__ == '__main__':
             print(time.time() - st)
             if c.signal and not c.ordering:
                 c.order_information_checker()   # 全ての条件をクリアしたら、取引を行う
-
-        except ccxt.BaseError:
-            print('Market Too Busy')
-            time.sleep(15)
 
         except Exception:
             time.sleep(5)

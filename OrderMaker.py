@@ -43,8 +43,13 @@ class OrderMaker(Information):
         time.sleep(2)
 
     def stop_order_maker(self, position_side, size):
-
-        side = 'buy' if position_side == 'sell' else 'buy'
+        """
+        makes stop order to execute loss
+        :param position_side:
+        :param size:
+        :return:
+        """
+        side = 'buy' if position_side == 'sell' else 'sell'
 
         self.bitmex.create_market_order(self.product, side, size)
 
