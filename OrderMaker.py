@@ -29,10 +29,7 @@ class OrderMaker(Information):
         :return:
         """
 
-        board = self.api.board(product_code=self.product)
-
-        asks = board['asks']
-        bids = board['bids']
+        self.orderbook_getter()
 
         ask_size = 0
         ask_price = 0

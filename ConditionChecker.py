@@ -7,7 +7,6 @@ import time
 
 
 class ConditionChecker(Information):
-
     """
     HitoricalDataとInformationから情報をもらってきて、取引すべき状態か否かチェックする。
     取引を行うと判断した場合には、OrderMakerへ指令を投げ、発注させる。
@@ -19,26 +18,13 @@ class ConditionChecker(Information):
         super().__init__()
         self.order_maker = OrderMaker()
         self.trade_history = HistoricalData()
-        # self.rd = RealtimeData()    # RealtimeDataのインスタンスを生成する
+
         self.recorder = Recorder()
 
-        self.df_tail = self.trade_history.df.tail(1)    # csvの最後の一行＝最新データを切り取る
+        self.df_tail = self.trade_history.ewma.tail(1)    # csvの最後の一行＝最新データを切り取る
 
-        # self.ewma_1day = self.df_tail['ewma1day'][0]
-        # self.ewma_3days = self.df_tail['ewma3days'][0]
-        # self.ewma_5days = self.df_tail['ewma5days'][0]
-        # self.ewma_25days = self.df_tail['ewma25days'][0]
-
-        # self.div_1day = self.df_tail['1dayDiv'][0]
-        # self.div_5days = self.df_tail['5dayDiv'][0]
-        # self.div_25days = self.df_tail['divergence'][0]
-
-        self.ewma_1hour = self.df_tail['ewma60mins'][0]
-        self.ewma_6hours = self.df_tail['ewma360mins'][0]
-        # self.ewma_12hours = self.df_tail['ewma12hrs'][0]
-
-        self.ewma_1min = self.df_tail['ewma_1min'][0]
-        self.ewma_5mins = self.df_tail['ewma_5mins'][0]
+        self.ewma_1day = self.df_tail['long'].iloc[0]
+        self.ewma_6hours = self.df_tail['short'].iloc[0]
 
         self.best_bid = 0
         self.best_ask = 0
@@ -52,15 +38,14 @@ class ConditionChecker(Information):
         self.ordering_price = 0    # 注文中の価格が入る
 
         self.market_flow = "SLEEP"     # 市場の流れ
-        # self.market_status = self.api.gethealth(product_code=self.product)['status']
 
         self.signal = False    # Trueならば取引GOサイン、Falseならば停止
 
         self.balance = self.bitmex.fetch_balance()['BTC']['total'] * 0.9985  # 証拠金残高、レバ１倍なのでそのまま余力
 
         self.order_id = None
-        self.ordering = False   # 注文中か否か確認用
-        self.positioning = False    # ポジションあるか否か確認用
+        self.ordering = False                # 注文中か否か確認用
+        self.positioning = False           # ポジションあるか否か確認用
 
         self.orderbook = self.bitmex.fetch_order_book('BTC/USD')
         self.bid = self.orderbook['bids'][0][0] if len(self.orderbook['bids']) > 0 else None
@@ -74,18 +59,10 @@ class ConditionChecker(Information):
         現在、市場が上昇傾向なのか下落傾向なのかを判断する。
         """
 
-        # rd = self.rd  # RealtimeDataインスタンス
-        # rd.get_current_data()
         self.renew_chart_data()
         self.current_price_getter()
         self.current_balance_getter()
         current_price = self.current_price
-
-        # div = abs((current_price - self.chart['ewma_1day']) / self.chart['ewma_1day'] * 100)  # ewma1 に対する現在価格の乖離率
-
-        # if div <= 0.5:
-        #     market = "SLEEP"
-        #     print('DIVGERGENCE IS TOO LOW, WAIT FOR CLEAR MOVEMENT, DIVERGENCE PERCENTAGE:', div, '%')
 
         if ((current_price > self.ewma_1min > self.ewma_5mins) or
            (self.ewma_5mins > self.ewma_1min and current_price > self.ewma_1min)):
@@ -110,23 +87,12 @@ class ConditionChecker(Information):
         """
 
         self.trade_history.renew_data()
-        self.df_tail = self.trade_history.df.tail(1)
+        self.df_tail = self.trade_history.ewma.tail(1)
 
-        # self.ewma_1day = self.df_tail['ewma1day'][0]
-        # self.ewma_3days = self.df_tail['ewma3days'][0]
-        # self.ewma_5days = self.df_tail['ewma5days'][0]
-        # self.ewma_25days = self.df_tail['ewma25days'][0]
-        #
-        # self.div_1day = self.df_tail['1dayDiv'][0]
-        # self.div_5days = self.df_tail['5dayDiv'][0]
-        # self.div_25days = self.df_tail['divergence'][0]
+        self.ewma_6hours = self.df_tail['short'].iloc[0]
+        self.ewma_1day = self.df_tail['long'].iloc[0]
 
-        self.ewma_1hour = self.df_tail['ewma60mins'][0]
-        self.ewma_6hours = self.df_tail['ewma360mins'][0]
-        # self.ewma_12hours = self.df_tail['ewma12hrs'][0]
-
-        self.ewma_1min = self.df_tail['ewma_1min'][0]
-        self.ewma_5mins = self.df_tail['ewma_5mins'][0]
+        self
 
     def board_status_checker(self):
         """
@@ -233,23 +199,6 @@ class ConditionChecker(Information):
 
         if abs(self.current_price - self.ordering_price) >= self.cancelling_line:
             self.waiting_time = 45
-    
-    # def slippage_checker(self):
-    #     """
-    #     約定した注文と、現在のポジションの平均価格を比較してスリッページを確認する
-    #     スリッページがあった場合には、一度注文をキャンセルして約定価格を変えさせる
-    #     :return:
-    #     """
-    #     ordered_price = self.orders[0]['price']
-    #     average_price = self.orders[0]['average_price']
-    #
-    #     if self.orders:
-    #         if ordered_price != average_price and self.orders[0]['executed_size'] != 0:
-    #             self.api.cancelparentorder(product_code=self.product,
-    #                                        parent_order_id=self.order_id
-    #                                        )
-    #             print('-----------------------------ORDER CANCELLED DUE TO SLIPPAGE-------------------------------')
-    #             time.sleep(1)
 
     def current_price_getter(self):
         """
@@ -290,6 +239,6 @@ class ConditionChecker(Information):
         :return:
         """
         self.orderbook = self.bitmex.fetch_order_book(symbol=self.product)
-        self.bid = self.orderbook['bids'][0][0] if len(self.orderbook['bids']) > 0 else None
-        self.ask = self.orderbook['asks'][0][0] if len(self.orderbook['asks']) > 0 else None
-        self.spread = (self.ask - self.bid) if (self.bid and self.ask) else None
+        self.bid = self.orderbook['bids']
+        self.ask = self.orderbook['asks']
+        self.spread = (self.ask[0][0] - self.bid[0][0])

@@ -13,7 +13,7 @@ class HistoricalData(Information):
         since = (time.time() - self.starting_time_from * 60) * 1000
 
         self.fetchdata = pd.DataFrame(self.bitmex.fetch_ohlcv(self.product, '5m', since, 500))
-        self.fetchdata.columns = ['timestamp', 'open', 'highest', 'lowest', 'close', 'volume']
+        self.fetchdata.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
         self.fetchdata['datetime'] = self.fetchdata['timestamp'].apply(lambda x: datetime.fromtimestamp(float(x/1000)))
 
         self.grad = pd.DataFrame()
@@ -30,7 +30,7 @@ class HistoricalData(Information):
         since = (time.time() - self.starting_time_from * 60) * 1000
 
         self.fetchdata = pd.DataFrame(self.bitmex.fetch_ohlcv(self.product, '5m', since, 500))
-        self.fetchdata.columns = ['timestamp', 'open', 'highest', 'lowest', 'close', 'volume']
+        self.fetchdata.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
         self.fetchdata['datetime'] = self.fetchdata['timestamp'].apply(lambda x: datetime.fromtimestamp(float(x/1000)))
 
         self.grad = pd.DataFrame()
