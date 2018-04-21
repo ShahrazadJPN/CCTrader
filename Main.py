@@ -19,7 +19,7 @@ if __name__ == '__main__':
                 count += 1
             elif count % 10 == 0:
                 c.order_actually_dead_checker()  # checks orders if they are still available or not
-                time.sleep(3)                 # avoid too many request
+                time.sleep(1)                 # avoid too many request
                 print('slept a bit to avoid making too many requests')
                 count += 1
             elif count != 100:
@@ -31,8 +31,8 @@ if __name__ == '__main__':
             c.position_checker()              # checks positions
             c.only_position_checker()         # checks positions without orders
             c.only_order_checker()            # checks orders and in certain circumstances cancels them
+            time.sleep(1)
             print(time.time() - st)
-
             if c.signal:
                 c.order_information_checker()   # 全ての条件をクリアしたら、取引を行う
 

@@ -122,6 +122,8 @@ class ConditionChecker(Information):
 
         self.orders = self.bitmex.fetch_open_orders(symbol=self.product)
 
+        print(self.orders)
+
         if not self.orders:
             self.signal = True
             self.ordering = False
@@ -148,7 +150,7 @@ class ConditionChecker(Information):
 
             order = self.order_maker.oco_order_maker(position_side, position_size, position_price)  # 決済注文を入れる
 
-            time.sleep(8)
+            time.sleep(3)
 
             print("OCO ORDER SENT:", order)
 

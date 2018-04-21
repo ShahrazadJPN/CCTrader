@@ -76,7 +76,7 @@ class OrderMaker(Information):
 
         print("ordered: " + str(first_side) + "BTC at the price of " + str(order_price))
         self.recorder.balance_recorder(balance, order_price, uniq_id)
-        time.sleep(8)
+        time.sleep(3)
 
     def order_base_maker(self, order_side, order_price):
 
