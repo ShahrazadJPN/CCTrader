@@ -33,7 +33,7 @@ if __name__ == '__main__':
             c.only_order_checker()            # checks orders and in certain circumstances cancels them
             time.sleep(1)
             print(time.time() - st)
-            if c.signal:
+            if c.signal and not c.ordering:
                 c.order_information_checker()   # 全ての条件をクリアしたら、取引を行う
 
         except requests.exceptions.HTTPError:

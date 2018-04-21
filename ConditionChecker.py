@@ -122,8 +122,6 @@ class ConditionChecker(Information):
 
         self.orders = self.bitmex.fetch_open_orders(symbol=self.product)
 
-        print(self.orders)
-
         if not self.orders:
             self.signal = True
             self.ordering = False

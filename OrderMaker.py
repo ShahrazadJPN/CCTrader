@@ -74,7 +74,7 @@ class OrderMaker(Information):
             'clOrdLinkID': uniq_id,
         })
 
-        print("ordered: " + str(first_side) + "BTC at the price of " + str(order_price))
+        print("ordered: " + str(first_side) + str(size) +" at the price of " + str(order_price))
         self.recorder.balance_recorder(balance, order_price, uniq_id)
         time.sleep(3)
 
