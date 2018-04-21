@@ -2,6 +2,7 @@ from ConditionChecker import ConditionChecker
 import time
 import traceback
 import requests
+import ccxt
 
 
 if __name__ == '__main__':
@@ -37,7 +38,9 @@ if __name__ == '__main__':
 
         except requests.exceptions.HTTPError:
             time.sleep(5)
-
+        except ccxt.base.errors.DDoSProtection:
+            print('too many requests made, sleep for 7 secs')
+            time.sleep(7)
         except Exception:
             time.sleep(3)
             traceback.print_exc()
