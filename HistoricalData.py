@@ -1,87 +1,43 @@
 import pandas as pd
 from datetime import datetime
-from cc_settings import Settings
+from Information import Information
+import time
+import numpy as np
 
 
-class HistoricalData(Settings):
+class HistoricalData(Information):
 
     def __init__(self):  # Dataframeを作成する
         super().__init__()
-        self.df = pd.read_csv(self.path,
-                              header=None,
-                              parse_dates=True,
-                              date_parser=lambda x: datetime.fromtimestamp(float(x)),
-                              index_col='datetime',
-                              names=['datetime', 'price', 'amount'])
 
-        # self.df['ewma1day'] = self.df['price'].ewm(span=144000).mean()  # 1日の加重移動平均
-        # self.df['ewma5days'] = self.df['price'].ewm(span=720000).mean()  # だいたい5日あたりの加重移動平均
-        # self.df['ewma25days'] = self.df['price'].ewm(span=3600).mean()  # だいたい25日あたりの加重移動平均
-        # self.df['divergence'] = (self.df['price'] - self.df['ewma25days']) / self.df['ewma25days'] * 100  # 25日乖離率
-        # self.df['1dayDiv'] = (self.df['price'] - self.df['ewma1day']) / self.df['ewma1day'] * 100  # 1日乖離率
-        # self.df['5dayDiv'] = (self.df['price'] - self.df['ewma5days']) / self.df['ewma5days'] * 100  # 5日乖離率
-        # self.df['ewma3days'] = self.df['price'].ewm(span=4320).mean()  # 3日移動平均
-        # self.df['ewma12hrs'] = self.df['price'].ewm(span=72000).mean()  # 6時間移動平均
-        self.df['ewma60mins'] = self.df['price'].ewm(span=6000).mean()  # 30分移動平均
-        self.df['ewma360mins'] = self.df['price'].ewm(span=36000).mean()  # 120分移動平均
-        self.df['ewma_1min'] = self.df['price'].ewm(span=100).mean()
-        self.df['ewma_5mins'] = self.df['price'].ewm(span=500).mean()
+        since = (time.time() - self.starting_time_from * 60) * 1000
 
-        # self.ewma_1day = self.df['ewma1day']
-        # self.ewma_3days = self.df['ewma3days']
-        # self.ewma_5days = self.df['ewma5days']
-        # self.ewma_25days = self.df['ewma25days']
+        self.fetchdata = pd.DataFrame(self.bitmex.fetch_ohlcv(self.product, '5m', since, 500))
+        self.fetchdata.columns = ['timestamp', 'open', 'highest', 'lowest', 'close', 'volume']
+        self.fetchdata['datetime'] = self.fetchdata['timestamp'].apply(lambda x: datetime.fromtimestamp(float(x/1000)))
 
-        # self.div_1day = self.df['1dayDiv']
-        # self.div_5days = self.df['5dayDiv']
-        # self.div_25days = self.df['divergence']
+        self.grad = pd.DataFrame()
+        self.ewma = pd.DataFrame()
 
-        self.ewma_1hour = self.df['ewma60mins']
-        self.ewma_6hours = self.df['ewma360mins']
-        # self.ewma_12hours = self.df['ewma12hrs']
+        self.ewma['long'] = self.fetchdata['close'].ewm(self.long_period, self.long_period, adjust=True).mean()
+        self.ewma['short'] = self.fetchdata['close'].ewm(self.short_period, self.short_period, adjust=True).mean()
 
-        self.ewma_1min = self.df['ewma_1min']
-        self.ewma_5mins = self.df['ewma_5mins']
-
-        self.length = len(self.df.index)
+        self.grad['long'] = np.gradient(self.ewma['long'])
+        self.grad['short'] = np.gradient(self.ewma['short'])
 
     def renew_data(self):
 
-        self.df = pd.read_csv(self.path,  # CSVを読み込み直すことで最新の状態に更新する
-                              header=None,
-                              parse_dates=True,
-                              date_parser=lambda x: datetime.fromtimestamp(float(x)),
-                              index_col='datetime',
-                              skiprows=(self.length - (self.length - 36000)),
-                              names=['datetime', 'price', 'amount'])
+        since = (time.time() - self.starting_time_from * 60) * 1000
 
-        # self.df['ewma1day'] = self.df['price'].ewm(span=1440).mean()  # 1日の加重移動平均
-        # self.df['ewma5days'] = self.df['price'].ewm(span=7200).mean()   # だいたい5日あたりの加重移動平均
-        # self.df['ewma25days'] = self.df['price'].ewm(span=3600).mean()  # だいたい25日あたりの加重移動平均
-        # self.df['divergence'] = (self.df['price'] - self.df['ewma25days']) / self.df['ewma25days'] * 100  # 25日乖離率
-        # self.df['1dayDiv'] = (self.df['price'] - self.df['ewma1day']) / self.df['ewma1day'] * 100  # 1日乖離率
-        # self.df['5dayDiv'] = (self.df['price'] - self.df['ewma5days']) / self.df['ewma5days'] * 100  # 5日乖離率
-        # self.df['ewma3days'] = self.df['price'].ewm(span=4320).mean()   # 3日移動平均
-        # self.df['ewma12hrs'] = self.df['price'].ewm(span=720).mean()   # 6時間移動平均
-        self.df['ewma60mins'] = self.df['price'].ewm(span=6000).mean()   # 30分移動平均
-        self.df['ewma360mins'] = self.df['price'].ewm(span=36000).mean()   # 120分移動平均
-        self.df['ewma_1min'] = self.df['price'].ewm(span=100).mean()
-        self.df['ewma_5mins'] = self.df['price'].ewm(span=500).mean()
+        self.fetchdata = pd.DataFrame(self.bitmex.fetch_ohlcv(self.product, '5m', since, 500))
+        self.fetchdata.columns = ['timestamp', 'open', 'highest', 'lowest', 'close', 'volume']
+        self.fetchdata['datetime'] = self.fetchdata['timestamp'].apply(lambda x: datetime.fromtimestamp(float(x/1000)))
 
-        # self.ewma_1day = self.df['ewma1day']
-        # self.ewma_3days = self.df['ewma3days']
-        # self.ewma_5days = self.df['ewma5days']
-        # self.ewma_25days = self.df['ewma25days']
+        self.grad = pd.DataFrame()
+        self.ewma = pd.DataFrame()
 
-        # self.div_1day = self.df['1dayDiv']
-        # self.div_5days = self.df['5dayDiv']
-        # self.div_25days = self.df['divergence']
+        self.ewma['long'] = self.fetchdata['close'].ewm(self.long_period, self.long_period, adjust=True).mean()
+        self.ewma['short'] = self.fetchdata['close'].ewm(self.short_period, self.short_period, adjust=True).mean()
 
-        self.ewma_1hour = self.df['ewma60mins']
-        self.ewma_6hours = self.df['ewma360mins']
-        # self.ewma_12hours = self.df['ewma12hrs']
-
-        self.ewma_1min = self.df['ewma_1min']
-        self.ewma_5mins = self.df['ewma_5mins']
-
-        self.length = len(self.df.index)
+        self.grad['long'] = np.gradient(self.ewma['long'])
+        self.grad['short'] = np.gradient(self.ewma['short'])

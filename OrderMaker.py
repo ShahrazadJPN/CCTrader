@@ -76,23 +76,23 @@ class OrderMaker(Information):
 
             return int(bid_price + 10)
 
-    def ifdoco_order_maker(self, first_side, size, limit_price, balance):
+    def ifdoco_order_maker(self, first_side, size, order_price, balance):
         """
         IFDOCOオーダーを発注する
         取引の要
         :param first_side:
         :param size:
-        :param limit_price:
-
+        :param order_price:
+        :param balance
         :return:
         """
 
-        data = self.order_base_maker(first_side, limit_price)
+        data = self.order_base_maker(first_side, order_price)
 
         opposite_side = 'sell' if first_side == 'buy' else 'buy'
         uniq_id = int(time.time())
 
-        self.bitmex.create_limit_order(self.product, first_side, size, limit_price, {
+        self.bitmex.create_limit_order(self.product, first_side, size, order_price, {
             'contingencyType': 'OneTriggersTheOther',
             'clOrdLinkID': uniq_id,
         })
@@ -108,29 +108,29 @@ class OrderMaker(Information):
             'clOrdLinkID': uniq_id,
         })
 
-        print("ordered: " + first_side, str(first_side) + "BTC at the price of " + str(limit_price))
-        self.recorder.balance_recorder(balance, limit_price)
+        print("ordered: " + first_side, str(first_side) + "BTC at the price of " + str(order_price))
+        self.recorder.balance_recorder(balance, order_price)
         time.sleep(1)
 
     def order_base_maker(self, order_side, order_price):
 
         loss = None
-        contrary = None
+        opposite = None
 
         if order_side == "buy":
 
-            contrary = "sell"
+            opposite = "sell"
 
             loss = int(order_price - self.lost_price)  # 同上、損切ライン
 
         elif order_side == "sell":
 
-            contrary = "buy"
+            opposite = "buy"
 
             loss = int(order_price + self.lost_price)  # 同上、損切ライン
 
         profit = self.profit_price_decider(order_side, order_price)
 
-        data = {'execution_side': contrary, 'loss_line': loss, 'profit_line': profit}
+        data = {'execution_side': opposite, 'loss_line': loss, 'profit_line': profit}
 
         return data
