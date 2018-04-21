@@ -36,10 +36,6 @@ if __name__ == '__main__':
             if c.signal and not c.ordering:
                 c.order_information_checker()   # 全ての条件をクリアしたら、取引を行う
 
-        except requests.exceptions.HTTPError:
-            print('ignore this')
-            time.sleep(15)
-
         except ccxt.BaseError:
             print('DDOS Error')
             time.sleep(15)
