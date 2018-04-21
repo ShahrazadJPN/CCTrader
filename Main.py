@@ -17,13 +17,13 @@ if __name__ == '__main__':
                 c.current_balance_getter()
                 c.current_price_getter()
                 count += 1
+            elif count == 70:
+                count = 0
             elif count % 5 == 0:
                 c.order_actually_dead_checker()  # checks orders if they are still available or not
                 time.sleep(5)                 # avoid too many request
                 print('slept a bit to avoid making too many requests')
                 count += 1
-            elif count == 70:
-                count = 0
             else:
                 count += 1
             c.market_reader()                 # gets latest chart and market data
