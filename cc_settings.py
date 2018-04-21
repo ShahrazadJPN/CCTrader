@@ -18,3 +18,4 @@ class Settings:
         self.long_period = 288                  # numbers of 5 mins candlestick for calculating ewma
         self.short_period = 36                  # numbers of 5 mins candlestick for calculating ewma
         self.last_ordered_price = None          # nomen est omen
+        self.order_margin = 5                   # margin price for making orders

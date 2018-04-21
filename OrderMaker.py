@@ -64,7 +64,7 @@ class OrderMaker(Information):
         :return:
         """
 
-        order_price = order_price - 3 if first_side == 'buy' else order_price + 3
+        order_price = order_price - self.order_margin if first_side == 'buy' else order_price + self.order_margin
 
         data = self.order_base_maker(first_side, order_price)
 
