@@ -17,11 +17,11 @@ class OrderMaker(Information):
         data = self.order_base_maker(position_side, position_price)
         uniq_id = time.time()
 
-        self.bitmex.create_limit_order(self.product, data['opposite_side'], position_size, data['profit_line'], {
+        self.bitmex.create_limit_order(self.product, data['execution_side'], position_size, data['profit_line'], {
             'contingencyType': 'OneCancelsTheOther',
             'clOrdLinkID': uniq_id,
         })
-        self.bitmex.create_order(self.product, 'StopLimit', data['opposite_side'], position_size, data['loss_line'], {
+        self.bitmex.create_order(self.product, 'StopLimit', data['execution_side'], position_size, data['loss_line'], {
             'contingencyType': 'OneCancelsTheOther',
             'stopPx': data['loss_line'],
             'orderQty': position_size,
@@ -38,7 +38,7 @@ class OrderMaker(Information):
 
         self.bitmex.cancel_order(order_id)
 
-        time.sleep(1)
+        time.sleep(2)
 
     def ifdoco_order_maker(self, first_side, size, order_price, balance):
         """
@@ -76,7 +76,7 @@ class OrderMaker(Information):
 
         print("ordered: " + str(first_side) + "BTC at the price of " + str(order_price))
         self.recorder.balance_recorder(balance, order_price, uniq_id)
-        time.sleep(1)
+        time.sleep(2)
 
     def order_base_maker(self, order_side, order_price):
 

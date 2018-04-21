@@ -14,16 +14,12 @@ class HistoricalData(Information):
 
         self.fetchdata = pd.DataFrame(self.bitmex.fetch_ohlcv(self.product, '5m', since, 500))
         self.fetchdata.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
-        self.fetchdata['datetime'] = self.fetchdata['timestamp'].apply(lambda x: datetime.fromtimestamp(float(x/1000)))
 
-        self.grad = pd.DataFrame()
         self.ewma = pd.DataFrame()
 
-        self.ewma['long'] = self.fetchdata['close'].ewm(self.long_period, self.long_period, adjust=True).mean()
-        self.ewma['short'] = self.fetchdata['close'].ewm(self.short_period, self.short_period, adjust=True).mean()
+        self.ewma['long'] = self.fetchdata['close'].ewm(span=self.long_period, adjust=True).mean()
+        self.ewma['short'] = self.fetchdata['close'].ewm(span=self.short_period, adjust=True).mean()
 
-        self.grad['long'] = np.gradient(self.ewma['long'])
-        self.grad['short'] = np.gradient(self.ewma['short'])
 
     def renew_data(self):
 
@@ -31,10 +27,6 @@ class HistoricalData(Information):
 
         self.fetchdata = pd.DataFrame(self.bitmex.fetch_ohlcv(self.product, '5m', since, 500))
         self.fetchdata.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
-        self.fetchdata['datetime'] = self.fetchdata['timestamp'].apply(lambda x: datetime.fromtimestamp(float(x/1000)))
 
-        self.ewma['long'] = self.fetchdata['close'].ewm(self.long_period, self.long_period, adjust=True).mean()
-        self.ewma['short'] = self.fetchdata['close'].ewm(self.short_period, self.short_period, adjust=True).mean()
-
-        self.grad['long'] = np.gradient(self.ewma['long'])
-        self.grad['short'] = np.gradient(self.ewma['short'])
+        self.ewma['long'] = self.fetchdata['close'].ewm(span=self.long_period, adjust=True).mean()
+        self.ewma['short'] = self.fetchdata['close'].ewm(span=self.short_period, adjust=True).mean()

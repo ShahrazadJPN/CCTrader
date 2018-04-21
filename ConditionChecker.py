@@ -26,9 +26,6 @@ class ConditionChecker(Information):
         self.ewma_1day = self.df_tail['long'].iloc[0]
         self.ewma_6hours = self.df_tail['short'].iloc[0]
 
-        self.short_gradient = 0
-        self.long_gradient = 0
-
         self.order_side = 'buy/sell'  # Will be buy or sell
 
         self.current_price = self.bitmex.fetch_ticker(symbol=self.product)['last']
@@ -59,9 +56,6 @@ class ConditionChecker(Information):
         現在、市場が上昇傾向なのか下落傾向なのかを判断する。
         """
 
-        self.renew_chart_data()
-        self.current_price_getter()
-        self.current_balance_getter()
         current_price = self.current_price
 
         if ((current_price > self.ewma_6hours > self.ewma_1day) or
@@ -92,9 +86,6 @@ class ConditionChecker(Information):
         self.ewma_6hours = self.df_tail['short'].iloc[0]
         self.ewma_1day = self.df_tail['long'].iloc[0]
 
-        self.long_gradient = self.trade_history.grad.tail(1)['long'].iloc[0]
-        self.short_gradient = self.trade_history.grad.tail(1)['short'].iloc[0]
-
     def board_status_checker(self):
         """
         スプレッドが大きく開いている時に止めさせる
@@ -112,7 +103,9 @@ class ConditionChecker(Information):
 
         positions = self.bitmex.private_get_position()
 
-        if not positions:                     # ポジションなし
+        no_position = True if positions[0]['simpleQty'] == 0 else False
+
+        if no_position:                     # ポジションなし
             self.signal = True
             self.positioning = False
         else:                                  # ポジションあり
@@ -148,9 +141,9 @@ class ConditionChecker(Information):
             position_size = 0
 
             for position in self.positions:
-                position_size += abs(position['simpleQty'])     # 全ポジションを確実に解消
+                position_size += abs(position['simpleCost'])     # 全ポジションを確実に解消
 
-            position_price = self.positions[0]['avgCostPrice']    # 値段はまあよい
+            position_price = int(self.positions[0]['avgCostPrice'])    # 値段はまあよい
             position_side = 'buy' if self.positions[0]['simpleQty'] > 0 else 'sell'
 
             order = self.order_maker.oco_order_maker(position_side, position_size, position_price)  # 決済注文を入れる
@@ -170,7 +163,6 @@ class ConditionChecker(Information):
             ordered_time = self.orders[0]['datetime']        # 注文を入れた時刻
             ordered_time = ordered_time.replace("T", " ")
             ordered_time = ordered_time.replace("Z", "")
-            ordered_time = ordered_time / 1000          # milliseconds
 
             if ordered_time.find(".") == -1:
                 ordered_time = datetime.strptime(ordered_time, '%Y-%m-%d %H:%M:%S')
@@ -181,9 +173,9 @@ class ConditionChecker(Information):
 
             passed_time = datetime.now().timestamp() - ordered_time  # 注文を入れてからの経過時間
 
-            print('Time till cancelling:', self.waiting_time - passed_time)
+            print('Time till cancelling:', self.waiting_time + 32400 - passed_time)
 
-            executed = self.orders[0]['simpleQty']       # 約定済みの分量がゼロでなければキャンセルはしない
+            executed = self.orders[0]['info']['simpleOrderQty']       # 約定済みの分量がゼロでなければキャンセルはしない
 
             if passed_time > self.waiting_time and executed == 0:     # 一定時間以上約定なし
                 self.order_maker.cancel_parent_order(self.order_id)
@@ -195,9 +187,10 @@ class ConditionChecker(Information):
         無理そうならばwaiting_timeを変更し、注文キャンセルの方向へ持っていく
         :return:
         """
-        # self.rd.get_current_data()
         self.current_price_getter()
-        self.ordering_price = self.orders[0]['price']   # 注文中の価格
+
+        if self.ordering:
+            self.ordering_price = self.orders[0]['price']   # 注文中の価格
 
         if abs(self.current_price - self.ordering_price) >= self.cancelling_line:
             self.waiting_time = 45
