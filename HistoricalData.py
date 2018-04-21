@@ -1,8 +1,6 @@
 import pandas as pd
-from datetime import datetime
 from Information import Information
 import time
-import numpy as np
 
 
 class HistoricalData(Information):

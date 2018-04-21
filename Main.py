@@ -37,6 +37,14 @@ if __name__ == '__main__':
             if c.signal and not c.ordering:
                 c.order_information_checker()   # makes order when requirements are fulfilled
 
+        except ccxt.DDoSProtection:
+            print('rate limit exceeded')
+            time.sleep(15)
+
+        except ccxt.ExchangeNotAvailable:
+            print('the market is too busy')
+            time.sleep(1)
+
         except Exception:
             time.sleep(5)
             traceback.print_exc()
