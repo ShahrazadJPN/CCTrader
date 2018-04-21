@@ -22,7 +22,7 @@ if __name__ == '__main__':
                 time.sleep(5)                 # avoid too many request
                 print('slept a bit to avoid making too many requests')
                 count += 1
-            elif count == 100:
+            elif count == 70:
                 count = 0
             else:
                 count += 1
