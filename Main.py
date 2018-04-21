@@ -11,7 +11,7 @@ if __name__ == '__main__':
     while True:
         try:
             st = time.time()
-            c.board_status_checker()          # che;:::::::::::::/\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\4r89e bcks board status
+            c.board_status_checker()          # checks board status
             if count == 0:
                 c.renew_chart_data()
                 c.current_balance_getter()
@@ -35,7 +35,7 @@ if __name__ == '__main__':
             time.sleep(1)
             print(time.time() - st)
             if c.signal and not c.ordering:
-                c.order_information_checker()   # 全ての条件をクリアしたら、取引を行う
+                c.order_information_checker()   # makes order when requirements are fulfilled
 
         except Exception:
             time.sleep(5)
