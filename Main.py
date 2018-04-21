@@ -19,13 +19,13 @@ if __name__ == '__main__':
                 count += 1
             elif count % 5 == 0:
                 c.order_actually_dead_checker()  # checks orders if they are still available or not
-                time.sleep(1)                 # avoid too many request
+                time.sleep(5)                 # avoid too many request
                 print('slept a bit to avoid making too many requests')
                 count += 1
-            elif count != 100:
-                count += 1
-            else:
+            elif count == 100:
                 count = 0
+            else:
+                count += 1
             c.market_reader()                 # gets latest chart and market data
             c.order_checker()                 # checks if there's an orders, and gets order id
             c.position_checker()              # checks positions
