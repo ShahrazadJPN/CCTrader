@@ -25,8 +25,10 @@ class Recorder(Information):
 
         time_ = dt.fromtimestamp(time_)
 
-        w = pd.DataFrame([[balance, time_, order_price]])
+        usd = balance * order_price
 
+        w = pd.DataFrame([[balance, time_, order_price, usd]])
+        
         w.to_csv(self.recording_path, index=False, encoding="utf-8", mode='a', header=False)    # append to the CSV
 
         print("資産：", str(balance), "売買価格：", str(order_price))

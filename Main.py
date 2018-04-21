@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
         except ccxt.DDoSProtection:
             print('rate limit exceeded')
-            time.sleep(15)
+            time.sleep(45)
 
         except ccxt.ExchangeNotAvailable:
             print('the market is too busy')
