@@ -1,6 +1,7 @@
 from ConditionChecker import ConditionChecker
 import time
 import traceback
+import requests
 
 
 if __name__ == '__main__':
@@ -34,6 +35,9 @@ if __name__ == '__main__':
             if c.signal:
                 c.order_information_checker()   # 全ての条件をクリアしたら、取引を行う
 
-        except:
+        except requests.exceptions.HTTPError:
+            time.sleep(5)
+
+        except Exception:
             time.sleep(3)
             traceback.print_exc()
