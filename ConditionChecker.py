@@ -3,7 +3,6 @@ from HistoricalData import HistoricalData
 from datetime import datetime
 from Recorder import Recorder
 from OrderMaker import OrderMaker
-import time
 
 
 class ConditionChecker(Information):
@@ -195,6 +194,27 @@ class ConditionChecker(Information):
 
         if abs(self.current_price - self.ordering_price) >= self.cancelling_line:
             self.waiting_time = 45
+
+    def emergency_checker(self):
+        """
+        ヤバそうなときにポジションを閉じる
+        :return:
+        """
+
+        if self.positioning:                                              # ポジションがあるとき
+            self.current_price_getter()
+            position_size = 0
+
+            for position in self.positions:
+                position_size += abs(position['simpleCost'])     # 全ポジションを確実に解消
+
+            position_price = int(self.positions[0]['avgCostPrice'])     # その値段
+            position_side = 'buy' if self.positions[0]['simpleQty'] > 0 else 'sell'
+            if abs(position_price - self.current_price) > self.lost_price:
+                self.order_maker.cancel_parent_order(self.order_id)
+                self.order_maker.stop_order_maker(position_side, position_size)
+        else:
+            pass
 
     def current_price_getter(self):
         """

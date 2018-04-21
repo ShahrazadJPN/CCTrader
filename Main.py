@@ -31,6 +31,7 @@ if __name__ == '__main__':
             c.position_checker()              # checks positions
             c.only_position_checker()         # checks positions without orders
             c.only_order_checker()            # checks orders and in certain circumstances cancels them
+            c.emergency_checker()             # closes all the positions
             time.sleep(1)
             print(time.time() - st)
             if c.signal and not c.ordering:
@@ -38,7 +39,7 @@ if __name__ == '__main__':
 
         except ccxt.BaseError:
             print('Market Too Busy')
-            time.sleep(5)
+            time.sleep(15)
 
         except Exception:
             time.sleep(5)

@@ -21,9 +21,9 @@ class OrderMaker(Information):
             'contingencyType': 'OneCancelsTheOther',
             'clOrdLinkID': uniq_id,
         })
-        self.bitmex.create_order(self.product, 'StopLimit', data['execution_side'], position_size, data['loss_line'], {
+        self.bitmex.create_order(self.product, 'Stop', data['execution_side'], position_size, data['loss_line'], {
             'contingencyType': 'OneCancelsTheOther',
-            'stopPx': data['loss_line'] - 5,
+            'stopPx': data['loss_line'],
             'orderQty': position_size,
             'price': data['loss_line'],
             'clOrdLinkID': uniq_id,
@@ -41,6 +41,12 @@ class OrderMaker(Information):
         self.bitmex.cancel_order(order_id)
         print('order cancelled')
         time.sleep(2)
+
+    def stop_order_maker(self, position_side, size):
+
+        side = 'buy' if position_side == 'sell' else 'buy'
+
+        self.bitmex.create_market_order(self.product, side, size)
 
     def ifdoco_order_maker(self, first_side, size, order_price, balance):
         """
@@ -70,7 +76,7 @@ class OrderMaker(Information):
         })
         self.bitmex.create_order(self.product, 'StopLimit', opposite_side, size, data['loss_line'], {   # loss order
             'contingencyType': 'OneCancelsTheOther',
-            'stopPx': data['loss_line'] - 5,
+            'stopPx': data['loss_line'],
             'orderQty': size,
             'price': data['loss_line'],
             'clOrdLinkID': uniq_id,
