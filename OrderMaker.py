@@ -37,7 +37,7 @@ class OrderMaker(Information):
         """
 
         self.bitmex.cancel_order(order_id)
-
+        print('order cancelled')
         time.sleep(2)
 
     def ifdoco_order_maker(self, first_side, size, order_price, balance):
@@ -66,11 +66,11 @@ class OrderMaker(Information):
             'contingencyType': 'OneCancelsTheOther',
             'clOrdLinkID': uniq_id,
         })
-        self.bitmex.create_order(self.product, 'StopLimit', opposite_side, size, data['loss_line'], {   # loss order
+        self.bitmex.create_order(self.product, 'Stop', opposite_side, size, data['loss_line'], {   # loss order
             'contingencyType': 'OneCancelsTheOther',
             'stopPx': data['loss_line'],
             'orderQty': size,
-            'price': data['loss_line'],
+            # 'price': data['loss_line'],
             'clOrdLinkID': uniq_id,
         })
 

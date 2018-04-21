@@ -103,7 +103,10 @@ class ConditionChecker(Information):
 
         positions = self.bitmex.private_get_position()
 
-        no_position = True if positions[0]['simpleQty'] == 0 else False
+        if positions:
+            no_position = True if positions[0]['simpleQty'] == 0 else False
+        else:
+            no_position = True
 
         if no_position:                     # ポジションなし
             self.signal = True
@@ -175,9 +178,9 @@ class ConditionChecker(Information):
 
             print('Time till cancelling:', self.waiting_time + 32400 - passed_time)
 
-            executed = self.orders[0]['info']['simpleOrderQty']       # 約定済みの分量がゼロでなければキャンセルはしない
+            passed_time = self.waiting_time + 32400 - passed_time
 
-            if passed_time > self.waiting_time and executed == 0:     # 一定時間以上約定なし
+            if passed_time < 0:     # 一定時間以上約定なし
                 self.order_maker.cancel_parent_order(self.order_id)
                 self.waiting_time = self.default_waiting_time            # キャンセルできたらキャンセル待ち時間を初期設定に戻す
 
