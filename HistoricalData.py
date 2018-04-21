@@ -18,7 +18,6 @@ class HistoricalData(Information):
         self.ewma['long'] = self.fetchdata['close'].ewm(span=self.long_period, adjust=True).mean()
         self.ewma['short'] = self.fetchdata['close'].ewm(span=self.short_period, adjust=True).mean()
 
-
     def renew_data(self):
 
         since = (time.time() - self.starting_time_from * 60) * 1000

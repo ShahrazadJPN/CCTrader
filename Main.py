@@ -1,7 +1,6 @@
 from ConditionChecker import ConditionChecker
 import time
 import traceback
-import requests
 import ccxt
 
 
