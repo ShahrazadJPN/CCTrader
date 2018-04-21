@@ -4,9 +4,9 @@ import api
 class Settings:
 
     def __init__(self):
-        self.api_key = api.api_key              # must be string
-        self.api_secret = api.api_secret        # string too
-        self.path = "historical_data.csv"       # historical trade data in csv format
+        self.api_key = api.api_key              # write your api_key in api.py
+        self.api_secret = api.api_secret        # idem
+        self.path = "historical_data.csv"       # historical trade data in csv format (not in use)
         self.recording_path = "record.csv"      # your balance history record in csv format
         self.product = "BTC/USD"                # product code
         self.lost_price = 30                    # loss contract price line
