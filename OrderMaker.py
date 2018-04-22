@@ -56,7 +56,6 @@ class OrderMaker(Information):
     def ifdoco_order_maker(self, first_side, size, order_price, balance):
         """
         IFDOCOオーダーを発注する
-        取引の要
         :param first_side:
         :param size:
         :param order_price:
@@ -87,7 +86,7 @@ class OrderMaker(Information):
             'clOrdLinkID': uniq_id,
         })
 
-        print("ordered: " + str(first_side) + str(size) +" at the price of " + str(order_price))
+        print("ordered: " + str(first_side) + str(size) + " at the price of " + str(order_price))
         self.recorder.balance_recorder(balance, order_price, uniq_id)
         time.sleep(3)
 
@@ -102,14 +101,14 @@ class OrderMaker(Information):
             opposite = "sell"
 
             profit = float(order_price + self.profit_price)
-            loss = float(order_price - self.lost_price)  # 同上、損切ライン
+            loss = float(order_price - self.lost_price)
 
         elif order_side == "sell":
 
             opposite = "buy"
 
             profit = float(order_price - self.profit_price)
-            loss = float(order_price + self.lost_price)  # 同上、損切ライン
+            loss = float(order_price + self.lost_price)
 
         data = {'execution_side': opposite, 'loss_line': loss, 'profit_line': profit}
 

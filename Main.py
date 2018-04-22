@@ -20,7 +20,7 @@ if __name__ == '__main__':
                 count = 0
             elif count % 5 == 0:
                 c.order_actually_dead_checker()  # checks orders if they are still available or not
-                c.emergency_checker()  # closes all the positions
+                # c.emergency_checker()  # closes all the positions
                 time.sleep(3)                 # avoid too many request
                 print('slept a bit to avoid making too many requests')
                 count += 1
