@@ -20,6 +20,7 @@ if __name__ == '__main__':
                 count = 0
             elif count % 5 == 0:
                 c.order_actually_dead_checker()  # checks orders if they are still available or not
+                c.emergency_checker()  # closes all the positions
                 time.sleep(3)                 # avoid too many request
                 print('slept a bit to avoid making too many requests')
                 count += 1
@@ -30,7 +31,6 @@ if __name__ == '__main__':
             c.position_checker()              # checks positions
             c.only_position_checker()         # checks positions without orders
             c.only_order_checker()            # checks orders and in certain circumstances cancels them
-            c.emergency_checker()             # closes all the positions
             time.sleep(1)
             print(time.time() - st)
             if c.signal and not c.ordering:
@@ -41,8 +41,11 @@ if __name__ == '__main__':
             time.sleep(45)
 
         except ccxt.ExchangeNotAvailable:
-            print('the market is too busy')
+            print('the market may be down')
             time.sleep(1)
+
+        except ccxt.ExchangeError:
+            print('the market is overloaded')
 
         except Exception:
             time.sleep(5)
