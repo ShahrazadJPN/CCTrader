@@ -241,6 +241,7 @@ class ConditionChecker(Information):
 
         if order_side == "buy" or order_side == "sell":
             self.current_price_getter()
+            self.current_balance_getter()
             purchasable_btc = self.balance * self.current_price
             order_size = int(purchasable_btc)
             order_price = self.current_price

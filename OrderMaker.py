@@ -23,7 +23,7 @@ class OrderMaker(Information):
         })
         self.bitmex.create_order(self.product, 'StopLimit', data['execution_side'], position_size, data['loss_line'], {
             'contingencyType': 'OneCancelsTheOther',
-            'stopPx': data['loss_line']-5,
+            'stopPx': data['loss_line'] - 5,
             'orderQty': position_size,
             'price': data['loss_line'],
             'clOrdLinkID': uniq_id,
@@ -80,7 +80,7 @@ class OrderMaker(Information):
         })
         self.bitmex.create_order(self.product, 'StopLimit', opposite_side, size, data['loss_line'], {   # loss order
             'contingencyType': 'OneCancelsTheOther',
-            'stopPx': data['loss_line']-5,
+            'stopPx': data['loss_line'] - 5,
             'orderQty': size,
             'price': data['loss_line'],
             'clOrdLinkID': uniq_id,
