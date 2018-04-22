@@ -4,10 +4,22 @@ import matplotlib.pyplot as plt
 
 df = pd.read_csv('record.csv',
                  header=None,
-                 names=['Balance', 'Date', 'Price'],
+                 names=['Bitcoin', 'Date', 'Price', 'USD'],
                  parse_dates=['Date'])
 
 print(df)
 
-df.plot(y='Balance', x='Date')
+d = df['Date']
+
+fig, ax1 = plt.subplots()
+ax1.plot(d, df['Bitcoin'], 'g', label='Bitcoin balance')
+ax2 = ax1.twinx()
+ax2.plot(d, df['USD'], 'r')
+plt.xlabel("Date", fontsize=15, fontname='sans-serif')  # x軸のタイトル
+plt.ylabel("USD", fontsize=11, fontname='sans-serif')  # y軸
+plt.title("Balance History", fontsize=15, fontname='sans-serif')  # タイトル
+handler1, label1 = ax1.get_legend_handles_labels()
+handler2, label2 = ax2.get_legend_handles_labels()
+ax1.legend(handler1 + handler2, label1 + label2)
+plt.tight_layout()
 plt.show()

@@ -225,7 +225,7 @@ class ConditionChecker(Information):
 
     def current_balance_getter(self):
 
-        self.balance = self.bitmex.fetch_balance()['BTC']['total'] * 0.9985
+        self.balance = self.bitmex.fetch_balance()['BTC']['total'] * 0.995
 
     def order_information_checker(self):
         """
