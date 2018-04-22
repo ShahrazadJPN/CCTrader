@@ -132,7 +132,7 @@ class OrderMaker(Information):
 
             profit = float(order_price + self.profit_price)
             loss = float(order_price - self.lost_price)
-            trigger = profit + 5
+            trigger = loss + 5
 
         elif order_side == "sell":
 
@@ -140,7 +140,7 @@ class OrderMaker(Information):
 
             profit = float(order_price - self.profit_price)
             loss = float(order_price + self.lost_price)
-            trigger = profit - 5
+            trigger = loss - 5
 
         data = {'execution_side': opposite, 'loss_line': loss, 'profit_line': profit, 'trigger': trigger}
 
