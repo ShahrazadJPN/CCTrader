@@ -13,25 +13,25 @@ class BackTester():
         self.margin = {}
         self.order = {}
 
-    @numba.jit()
+    # @numba.jit()
     def MakingProfitLine_B(self):
         val = self.order['price']+(self.margin['profit']+(self.order['price']*self.margin['profit_rate']))
         print('元値:'+str(self.order['price'])+'利確ライン:'+str(val))
         return val
 
-    @numba.jit()
+    # @numba.jit()
     def MakingStopLine_B(self):
         val = self.order['price']-(self.margin['lost']+(self.order['price']*self.margin['lost_rate']))
         print('元値:'+str(self.order['price'])+'損切ライン:'+str(val))
         return val
 
-    @numba.jit()
+    # @numba.jit()
     def MakingProfitLine_S(self):
         val = self.order['price']-(self.margin['profit']+(self.order['price']*self.margin['profit_rate']))
         print('元値:'+str(self.order['price'])+'利確ライン:'+str(val))
         return val
 
-    @numba.jit()
+    # @numba.jit()
     def MakingStopLine_S(self):
         val = self.order['price']+(self.margin['lost']+(self.order['price']*self.margin['lost_rate']))
         print('元値:'+str(self.order['price'])+'損切ライン:'+str(val))
