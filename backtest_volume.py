@@ -76,22 +76,22 @@ class BackTester():
     @numba.jit()
     def mainpart(self):
 
-        #-----
+        # -----
         # Initial Setting
-        #-----
+        # -----
 
-        self.money = 2000             # unit = $
+        self.money = 200        # unit = $
         self.threshold = {
-            'volume': 8_000_000,
+            'volume': 3_000_000,
             'div': 0.01,
         }
         self.margin = {
-            "order": 0,           # margin price for order
+            "order": 0,          # margin price for order
             "order_cancel": 10,
-            "profit": 65,       #unit = $
-            "profit_rate": 0,  #unit = [100%]
-            "lost": 45,         #unit = $
-            "lost_rate": 0,    #unit = [100%]
+            "profit": 35,        # unit = $
+            "profit_rate": 0,    # unit = [100%]
+            "lost": 25,          # unit = $
+            "lost_rate": 0,      # unit = [100%]
         }
         span = {
             "long": 500,

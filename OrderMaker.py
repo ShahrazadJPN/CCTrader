@@ -144,10 +144,10 @@ class OrderMaker(Information):
         market = self.bitmex.create_market_order(self.product,
                                                  first_side,
                                                  size,
-                                                 {
-                                                  'contingencyType': 'OneTriggersTheOther',
-                                                  'clOrdLinkID': uniq_id,
-                                                 }
+                                                # {
+                                                #  'contingencyType': 'OneTriggersTheOther',
+                                                #  'clOrdLinkID': uniq_id,
+                                               #  }
                                                  )
         return market
 

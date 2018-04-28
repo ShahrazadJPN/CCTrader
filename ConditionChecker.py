@@ -87,6 +87,8 @@ class ConditionChecker(Information):
         self.trade_history.renew_data()
         self.df_tail = self.trade_history.ewma.tail(1)
         self.ticker_tail = self.trade_history.fetchdata.tail(1)
+        self.current_open = self.ticker_tail['open'].iloc[0]
+        self.current_close = self.ticker_tail['close'].iloc[0]
 
         self.ewma_6hours = self.df_tail['short'].iloc[0]
         self.ewma_1day = self.df_tail['long'].iloc[0]
