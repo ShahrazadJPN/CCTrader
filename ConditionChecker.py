@@ -61,6 +61,8 @@ class ConditionChecker(Information):
 
         if self.current_volume > self.volume_threshold:
 
+            print(self.current_open, self.current_close)
+
             if self.current_open > self.current_close:
                 market = "UP"
                 self.order_side = "buy"
@@ -74,6 +76,8 @@ class ConditionChecker(Information):
 
         else:
             market = "SLEEP"
+
+        print(market)
 
         self.market_flow = market
 

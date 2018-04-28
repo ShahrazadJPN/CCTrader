@@ -82,7 +82,7 @@ class BackTester():
 
         self.money = 200        # unit = $
         self.threshold = {
-            'volume': 3_000_000,
+            'volume': 1_000_000,
             'div': 0.01,
         }
         self.margin = {

@@ -19,4 +19,4 @@ class Settings:
         self.short_period = 60                  # numbers of 1 mins candlestick for calculating ewma
         self.last_ordered_price = None          # nomen est omen
         self.order_margin = 4                   # margin price for making orders
-        self.volume_threshold = 3_000_000      # when higher than this value starts making orders
+        self.volume_threshold = 1500000      # when higher than this value starts making orders

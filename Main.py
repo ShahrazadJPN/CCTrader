@@ -35,7 +35,6 @@ if __name__ == '__main__':
             c.only_position_checker()         # checks positions without orders
             c.only_order_checker()            # checks orders and in certain circumstances cancels them
             time.sleep(1)
-            print(time.time() - st)
             if c.signal and not c.ordering:
                 c.order_information_checker()   # makes order when requirements are fulfilled
 
