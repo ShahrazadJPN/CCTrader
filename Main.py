@@ -5,8 +5,10 @@ import ccxt
 
 
 if __name__ == '__main__':
+    print('Connecting.....')
     c = ConditionChecker()
     count = 0
+    print('Starting.....')
     while True:
         try:
             st = time.time()
@@ -14,13 +16,13 @@ if __name__ == '__main__':
             if count == 0:
                 c.renew_chart_data()
                 c.current_balance_getter()
-                c.current_price_getter()
+                # c.current_price_getter()
                 count += 1
-            elif count == 70:
+            elif count == 30:
                 count = 0
             elif count % 5 == 0:
-                c.order_actually_dead_checker()  # checks orders if they are still available or not
-                # c.emergency_checker()  # closes all the positions
+                # c.order_actually_dead_checker()  # checks orders if they are still available or not
+                # c.emergency_checker()          # closes all the positions
                 c.current_price_getter()
                 time.sleep(3)                 # avoid too many request
                 print('slept a bit to avoid making too many requests')

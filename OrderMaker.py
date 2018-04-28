@@ -67,13 +67,14 @@ class OrderMaker(Information):
 
         self.bitmex.create_market_order(self.product, side, size)
 
-    def ifdoco_order_maker(self, first_side, size, order_price, balance):
+    def ifdoco_order_maker(self, first_side, size, order_price, balance, order_type):
         """
         IFDOCOオーダーを発注する
         :param first_side:
         :param size:
         :param order_price:
-        :param balance
+        :param balance      Current Balance
+        :param order_type  MARKET or LIMIT
         :return:
         """
 
@@ -84,10 +85,11 @@ class OrderMaker(Information):
         opposite_side = 'sell' if first_side == 'buy' else 'buy'
         uniq_id = int(time.time())
 
-        ord1 = self.bitmex.create_limit_order(self.product, first_side, size, order_price, {           # first order
-            'contingencyType': 'OneTriggersTheOther',
-            'clOrdLinkID': uniq_id,
-        })
+        if order_type == 'Market':
+            ord1 = self.first_market_order_maker_for_ifdoco(first_side, size, uniq_id)
+        else:
+            ord1 = self.first_limit_order_maker_for_ifdoco(first_side, size, order_price, uniq_id)
+
         ord2 = self.bitmex.create_limit_order(self.product,
                                               opposite_side,
                                               size,
@@ -118,6 +120,36 @@ class OrderMaker(Information):
         print("ordered: " + str(first_side).capitalize() + ' ' + str(size) + " USD at " + str(order_price))
         self.recorder.balance_recorder(balance, order_price, uniq_id)
         time.sleep(3)
+
+    def first_limit_order_maker_for_ifdoco(self, first_side, size, order_price, uniq_id):
+        """
+        IFDOCOの一段目を作るやつ。指値注文。
+        :return:
+        """
+        order = self.bitmex.create_limit_order(self.product, first_side, size, order_price, {  # first order
+            'contingencyType': 'OneTriggersTheOther',
+            'clOrdLinkID': uniq_id,
+        })
+        return order
+
+    def first_market_order_maker_for_ifdoco(self, first_side, size, uniq_id):
+        """
+        Makes first market order of IFDOCO order.
+        :param first_side:
+        :param size:
+        :param uniq_id:
+        :return:
+        """
+
+        market = self.bitmex.create_market_order(self.product,
+                                                 first_side,
+                                                 size,
+                                                 {
+                                                  'contingencyType': 'OneTriggersTheOther',
+                                                  'clOrdLinkID': uniq_id,
+                                                 }
+                                                 )
+        return market
 
     def order_base_maker(self, order_side, order_price):
 

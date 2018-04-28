@@ -10,7 +10,7 @@ class HistoricalData(Information):
 
         since = (time.time() - self.starting_time_from * 60) * 1000
 
-        self.fetchdata = pd.DataFrame(self.bitmex.fetch_ohlcv(self.product, '5m', since, 500))
+        self.fetchdata = pd.DataFrame(self.bitmex.fetch_ohlcv(self.product, '1m', since, 500))
         self.fetchdata.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
 
         self.ewma = pd.DataFrame()
@@ -22,7 +22,7 @@ class HistoricalData(Information):
 
         since = (time.time() - self.starting_time_from * 60) * 1000
 
-        self.fetchdata = pd.DataFrame(self.bitmex.fetch_ohlcv(self.product, '5m', since, 500))
+        self.fetchdata = pd.DataFrame(self.bitmex.fetch_ohlcv(self.product, '1m', since, 500))
         self.fetchdata.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume']
 
         self.ewma['long'] = self.fetchdata['close'].ewm(span=self.long_period, adjust=True).mean()

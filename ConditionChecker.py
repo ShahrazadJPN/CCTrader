@@ -21,6 +21,7 @@ class ConditionChecker(Information):
         self.recorder = Recorder()
 
         self.df_tail = self.trade_history.ewma.tail(1)    # csvの最後の一行＝最新データを切り取る
+        self.ticker_tail = self.trade_history.fetchdata.tail(1)
 
         self.ewma_1day = self.df_tail['long'].iloc[0]
         self.ewma_6hours = self.df_tail['short'].iloc[0]
@@ -28,6 +29,9 @@ class ConditionChecker(Information):
         self.order_side = 'buy/sell'  # Will be buy or sell
 
         self.current_price = self.bitmex.fetch_ticker(symbol=self.product)['last']
+        self.current_volume = self.ticker_tail['volume'].iloc[0]
+        self.current_open = self.ticker_tail['open'].iloc[0]
+        self.current_close = self.ticker_tail['close'].iloc[0]
 
         self.orders = []            # 現在の注文が入る
         self.positions = []         # 現在のポジションが入る
@@ -55,17 +59,18 @@ class ConditionChecker(Information):
         現在、市場が上昇傾向なのか下落傾向なのかを判断する。
         """
 
-        current_price = self.current_price
+        if self.current_volume > self.volume_threshold:
 
-        if ((current_price > self.ewma_6hours > self.ewma_1day) or
-           (self.ewma_1day > self.ewma_6hours and current_price > self.ewma_6hours)):
-            market = "UP"
-            self.order_side = "buy"
+            if self.current_open > self.current_close:
+                market = "UP"
+                self.order_side = "buy"
 
-        elif ((current_price < self.ewma_6hours < self.ewma_1day) or
-                (self.ewma_6hours > self.ewma_1day and self.ewma_6hours > current_price)):
-            market = "DOWN"
-            self.order_side = "sell"
+            elif self.current_open < self.current_close:
+                market = "DOWN"
+                self.order_side = "sell"
+
+            else:
+                market = "SLEEP"
 
         else:
             market = "SLEEP"
@@ -81,6 +86,7 @@ class ConditionChecker(Information):
 
         self.trade_history.renew_data()
         self.df_tail = self.trade_history.ewma.tail(1)
+        self.ticker_tail = self.trade_history.fetchdata.tail(1)
 
         self.ewma_6hours = self.df_tail['short'].iloc[0]
         self.ewma_1day = self.df_tail['long'].iloc[0]
@@ -245,8 +251,9 @@ class ConditionChecker(Information):
             purchasable_btc = self.balance * self.current_price
             order_size = int(purchasable_btc)
             order_price = self.current_price
+            order_type = 'Market'               # Todo: いつか可変にする
 
-            self.order_maker.ifdoco_order_maker(order_side, order_size, order_price, self.balance)
+            self.order_maker.ifdoco_order_maker(order_side, order_size, order_price, self.balance, order_type)
         else:
             pass
 
