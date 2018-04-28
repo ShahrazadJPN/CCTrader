@@ -16,24 +16,24 @@ if __name__ == '__main__':
             if count == 0:
                 c.renew_chart_data()
                 c.current_balance_getter()
+                c.market_reader()  # gets latest chart and market data
                 # c.current_price_getter()
                 count += 1
-            elif count == 30:
+            elif count == 3:
                 count = 0
-            elif count % 5 == 0:
-                # c.order_actually_dead_checker()  # checks orders if they are still available or not
-                # c.emergency_checker()          # closes all the positions
-                c.current_price_getter()
-                time.sleep(3)                 # avoid too many request
-                print('slept a bit to avoid making too many requests')
-                count += 1
+            # elif count % 5 == 0:
+            #     # c.order_actually_dead_checker()  # checks orders if they are still available or not
+            #     # c.emergency_checker()          # closes all the positions
+            #     c.current_price_getter()
+            #     time.sleep(2)                 # avoid too many request
+            #     print('slept a bit to avoid making too many requests')
+            #     count += 1
             else:
                 count += 1
-            c.market_reader()                 # gets latest chart and market data
-            c.order_checker()                 # checks if there's an orders, and gets order id
+            c.order_checker()                 # checks if there's an order, and gets order id
             c.position_checker()              # checks positions
             c.only_position_checker()         # checks positions without orders
-            c.only_order_checker()            # checks orders and in certain circumstances cancels them
+            # c.only_order_checker()            # checks orders and in certain circumstances cancels them
             time.sleep(1)
             if c.signal and not c.ordering:
                 c.order_information_checker()   # makes order when requirements are fulfilled
@@ -47,5 +47,5 @@ if __name__ == '__main__':
             time.sleep(1)
 
         except Exception:
-            time.sleep(5)
+            time.sleep(1)
             traceback.print_exc()

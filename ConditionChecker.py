@@ -21,7 +21,7 @@ class ConditionChecker(Information):
         self.recorder = Recorder()
 
         self.df_tail = self.trade_history.ewma.tail(1)    # csvの最後の一行＝最新データを切り取る
-        self.ticker_tail = self.trade_history.fetchdata.tail(1)
+        self.ticker_tail = self.trade_history.fetchdata.tail(2)
 
         self.ewma_1day = self.df_tail['long'].iloc[0]
         self.ewma_6hours = self.df_tail['short'].iloc[0]
@@ -33,19 +33,19 @@ class ConditionChecker(Information):
         self.current_open = self.ticker_tail['open'].iloc[0]
         self.current_close = self.ticker_tail['close'].iloc[0]
 
-        self.orders = []            # 現在の注文が入る
-        self.positions = []         # 現在のポジションが入る
-        self.ordering_price = 0    # 注文中の価格が入る
+        self.orders = []                    # 現在の注文が入る
+        self.positions = []                 # 現在のポジションが入る
+        self.ordering_price = 0             # 注文中の価格が入る
 
-        self.market_flow = "SLEEP"     # 市場の流れ
+        self.market_flow = "SLEEP"          # 市場の流れ
+        self.signal = False                 # True for GO, False for STOP
 
-        self.signal = False    # Trueならば取引GOサイン、Falseならば停止
-
-        self.balance = self.bitmex.fetch_balance()['BTC']['total'] * 0.9985  # 証拠金残高、レバ１倍なのでそのまま余力
+        self.last_ordered_close = 0                                          # A bin's close price
+        self.balance = self.bitmex.fetch_balance()['BTC']['total'] * 0.9985  # 証拠金残高
 
         self.order_id = None
-        self.ordering = False                # 注文中か否か確認用
-        self.positioning = False           # ポジションあるか否か確認用
+        self.ordering = False               # 注文中か否か確認用
+        self.positioning = False            # ポジションあるか否か確認用
 
         self.orderbook = self.bitmex.fetch_order_book('BTC/USD')
         self.bid = self.orderbook['bids'][0][0] if len(self.orderbook['bids']) > 0 else None
@@ -61,7 +61,7 @@ class ConditionChecker(Information):
 
         if self.current_volume > self.volume_threshold:
 
-            print(self.current_open, self.current_close)
+            print(self.current_open, self.current_close, ' <- OPEN and Close')
 
             if self.current_open > self.current_close:
                 market = "UP"
@@ -75,7 +75,7 @@ class ConditionChecker(Information):
                 market = "SLEEP"
 
         else:
-            market = "SLEEP"
+            market = "SLEEP DUE TO VOLUME THRESHOLD"
 
         print(market)
 
@@ -90,9 +90,10 @@ class ConditionChecker(Information):
 
         self.trade_history.renew_data()
         self.df_tail = self.trade_history.ewma.tail(1)
-        self.ticker_tail = self.trade_history.fetchdata.tail(1)
+        self.ticker_tail = self.trade_history.fetchdata.tail(2)
         self.current_open = self.ticker_tail['open'].iloc[0]
         self.current_close = self.ticker_tail['close'].iloc[0]
+        self.current_volume = self.ticker_tail['volume'].iloc[0]
 
         self.ewma_6hours = self.df_tail['short'].iloc[0]
         self.ewma_1day = self.df_tail['long'].iloc[0]
@@ -251,13 +252,16 @@ class ConditionChecker(Information):
         else:
             order_side = "NONE"
 
-        if order_side == "buy" or order_side == "sell":
+        if self.current_close == self.last_ordered_close:
+            pass
+        elif order_side == "buy" or order_side == "sell":
             self.current_price_getter()
             self.current_balance_getter()
             purchasable_btc = self.balance * self.current_price
             order_size = int(purchasable_btc)
             order_price = self.current_price
             order_type = 'Market'               # Todo: いつか可変にする
+            self.last_ordered_close = self.current_close
 
             self.order_maker.ifdoco_order_maker(order_side, order_size, order_price, self.balance, order_type)
         else:
