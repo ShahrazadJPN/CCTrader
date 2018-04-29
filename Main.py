@@ -11,7 +11,6 @@ if __name__ == '__main__':
     print('Starting.....')
     while True:
         try:
-            st = time.time()
             c.board_status_checker()          # checks board status
             if count == 0:
                 c.renew_chart_data()
@@ -19,7 +18,7 @@ if __name__ == '__main__':
                 c.market_reader()  # gets latest chart and market data
                 # c.current_price_getter()
                 count += 1
-            elif count == 3:
+            elif count == 5:
                 count = 0
             # elif count % 5 == 0:
             #     # c.order_actually_dead_checker()  # checks orders if they are still available or not
@@ -34,7 +33,7 @@ if __name__ == '__main__':
             c.position_checker()              # checks positions
             c.only_position_checker()         # checks positions without orders
             # c.only_order_checker()            # checks orders and in certain circumstances cancels them
-            time.sleep(1)
+            time.sleep(2)
             if c.signal and not c.ordering:
                 c.order_information_checker()   # makes order when requirements are fulfilled
 
