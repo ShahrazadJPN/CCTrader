@@ -40,7 +40,7 @@ class ConditionChecker(Information):
         self.market_flow = "SLEEP"          # 市場の流れ
         self.signal = False                 # True for GO, False for STOP
 
-        self.last_ordered_close = 0                                          # A bin's close price
+        self.last_ordered_open = 0                                           # A bin's open price
         self.balance = self.bitmex.fetch_balance()['BTC']['total'] * 0.9985  # 証拠金残高
 
         self.order_id = None
@@ -214,16 +214,18 @@ class ConditionChecker(Information):
         :return:
         """
 
-        if self.positioning:                                              # ポジションがあるとき
+        if self.positioning:                                                # ポジションがあるとき
             self.current_price_getter()
             position_size = 0
 
             for position in self.positions:
-                position_size += abs(position['simpleCost'])     # 全ポジションを確実に解消
+                position_size += abs(position['simpleCost'])                # 全ポジションを確実に解消
 
-            position_price = int(self.positions[0]['avgCostPrice'])     # その値段
+            position_price = int(self.positions[0]['avgCostPrice'])         # ポジション価格取得
             position_side = 'buy' if self.positions[0]['simpleQty'] > 0 else 'sell'
-            if abs(position_price - self.current_price) > self.lost_price:
+
+            if ((position_side == 'buy' and (position_price - self.current_price) > self.lost_price) or
+               (position_side == 'sell' and (position_price - self.current_price) < self.lost_price * -1)):
                 self.order_maker.cancel_parent_order(self.order_id)
                 self.order_maker.stop_order_maker(position_side, position_size)
         else:
@@ -252,8 +254,8 @@ class ConditionChecker(Information):
         else:
             order_side = "NONE"
 
-        if self.current_close == self.last_ordered_close:
-            pass
+        if self.current_open == self.last_ordered_open:
+            print('Only an order a minute')
         elif order_side == "buy" or order_side == "sell":
             self.current_price_getter()
             self.current_balance_getter()
@@ -261,9 +263,10 @@ class ConditionChecker(Information):
             order_size = int(purchasable_btc)
             order_price = self.current_price
             order_type = 'Market'               # Todo: いつか可変にする
-            self.last_ordered_close = self.current_close
 
             self.order_maker.ifdoco_order_maker(order_side, order_size, order_price, self.balance, order_type)
+
+            self.last_ordered_open = self.current_open
         else:
             pass
 

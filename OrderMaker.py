@@ -67,6 +67,8 @@ class OrderMaker(Information):
 
         self.bitmex.create_market_order(self.product, side, size)
 
+        print('stop market order made')
+
     def ifdoco_order_maker(self, first_side, size, order_price, balance, order_type):
         """
         IFDOCOオーダーを発注する
@@ -147,7 +149,7 @@ class OrderMaker(Information):
                                                 # {
                                                 #  'contingencyType': 'OneTriggersTheOther',
                                                 #  'clOrdLinkID': uniq_id,
-                                               #  }
+                                                #  }
                                                  )
         return market
 
