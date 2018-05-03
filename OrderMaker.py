@@ -30,7 +30,7 @@ class OrderMaker(Information):
                                         'StopLimit',
                                         data['execution_side'],
                                         position_size,
-                                        data['loss_line'],
+                                        params=
                                         {
                                          'contingencyType': 'OneCancelsTheOther',
                                          'stopPx': data['trigger'],
@@ -88,9 +88,9 @@ class OrderMaker(Information):
         uniq_id = int(time.time())
 
         if order_type == 'Market':
-            ord1 = self.first_market_order_maker_for_ifdoco(first_side, size, uniq_id)
+            ord1 = self.first_market_order_maker_for_ifdoco(first_side, size, uniq_id, order_price, balance)
         else:
-            ord1 = self.first_limit_order_maker_for_ifdoco(first_side, size, order_price, uniq_id)
+            ord1 = self.first_limit_order_maker_for_ifdoco(first_side, size, order_price, uniq_id, balance)
 
         ord2 = self.bitmex.create_limit_order(self.product,
                                               opposite_side,
@@ -105,14 +105,13 @@ class OrderMaker(Information):
                                         'StopLimit',
                                         opposite_side,
                                         size,
-                                        data['loss_line'],
-                                        {                      # loss order
-                                         'contingencyType': 'OneCancelsTheOther',
-                                         'stopPx': data['trigger'],
-                                         'orderQty': size,
-                                         'price': data['loss_line'],
-                                         'clOrdLinkID': uniq_id,
-                                        }
+                                        params={                      # loss order
+                                                'contingencyType': 'OneCancelsTheOther',
+                                                'stopPx': data['trigger'],
+                                                'orderQty': size,
+                                                'price': data['loss_line'],
+                                                'clOrdLinkID': uniq_id,
+                                                }
                                         )
 
         print('first order:', ord1)
@@ -123,7 +122,7 @@ class OrderMaker(Information):
         self.recorder.balance_recorder(balance, order_price, uniq_id)
         time.sleep(3)
 
-    def first_limit_order_maker_for_ifdoco(self, first_side, size, order_price, uniq_id):
+    def first_limit_order_maker_for_ifdoco(self, first_side, size, order_price, uniq_id, balance):
         """
         IFDOCOの一段目を作るやつ。指値注文。
         :return:
@@ -132,25 +131,25 @@ class OrderMaker(Information):
             'contingencyType': 'OneTriggersTheOther',
             'clOrdLinkID': uniq_id,
         })
+        self.recorder.balance_recorder(balance, order_price, uniq_id)
         return order
 
-    def first_market_order_maker_for_ifdoco(self, first_side, size, uniq_id):
+    def first_market_order_maker_for_ifdoco(self, first_side, size, uniq_id, order_price, balance):
         """
         Makes first market order of IFDOCO order.
         :param first_side:
         :param size:
+        :param balance:
+        :param order_price:
         :param uniq_id:
         :return:
         """
 
         market = self.bitmex.create_market_order(self.product,
                                                  first_side,
-                                                 size,
-                                                # {
-                                                #  'contingencyType': 'OneTriggersTheOther',
-                                                #  'clOrdLinkID': uniq_id,
-                                                #  }
+                                                 size
                                                  )
+        self.recorder.balance_recorder(balance, order_price, uniq_id)
         return market
 
     def order_base_maker(self, order_side, order_price):

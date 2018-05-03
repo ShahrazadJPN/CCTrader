@@ -12,7 +12,7 @@ class Settings:
         self.lost_price = 25                    # loss contract price line
         self.cancelling_line = 10               # 現在価格と注文価格の差がこれより大きくなったらwaiting_timeを変更する
         self.default_waiting_time = 900         # waiting time till cancelling orders
-        self.profit_price = 27                   # profit contract price line
+        self.profit_price = 22                   # profit contract price line
         self.spread_limit = 0.5                 # spread allowance limit
         self.starting_time_from = 480           # staring time from now for ohlcv fetching, in minutes
         self.long_period = 360                  # numbers of 1 mins candlestick for calculating ewma

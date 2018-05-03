@@ -17,7 +17,7 @@ ax1.plot(d, df['Bitcoin'], 'g', label='Bitcoin balance')
 ax2 = ax1.twinx()
 ax2.plot(d, df['USD'], 'r')
 ax1.set_xticklabels(d, rotation=45)
-ax1.xaxis.set_major_locator(mdates.HourLocator(interval=3))
+ax1.xaxis.set_major_locator(mdates.DayLocator(interval=1))
 ax1.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d %H'))
 plt.xlabel("Date", fontsize=15, fontname='sans-serif')  # x軸のタイトル
 plt.ylabel("USD", fontsize=11, fontname='sans-serif')  # y軸

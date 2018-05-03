@@ -20,7 +20,7 @@ if __name__ == '__main__':
                 count += 1
             elif count == 5:
                 count = 0
-                c.emergency_checker()          # closes all the positions
+            #    c.emergency_checker()          # closes all the positions
             # elif count % 5 == 0:
             #     # c.order_actually_dead_checker()  # checks orders if they are still available or not
             #     c.current_price_getter()
@@ -33,7 +33,7 @@ if __name__ == '__main__':
             c.position_checker()              # checks positions
             c.only_position_checker()         # checks positions without orders
             # c.only_order_checker()            # checks orders and in certain circumstances cancels them
-            time.sleep(2)
+            time.sleep(1)
             if c.signal and not c.ordering:
                 c.order_information_checker()   # makes order when requirements are fulfilled
 
