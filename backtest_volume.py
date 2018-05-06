@@ -13,25 +13,25 @@ class BackTester():
         self.margin = {}
         self.order = {}
 
-    # @numba.jit()
+    @numba.jit()
     def MakingProfitLine_B(self):
         val = self.order['price']+(self.margin['profit']+(self.order['price']*self.margin['profit_rate']))
         print('元値:'+str(self.order['price'])+'利確ライン:'+str(val))
         return val
 
-    # @numba.jit()
+    @numba.jit()
     def MakingStopLine_B(self):
         val = self.order['price']-(self.margin['lost']+(self.order['price']*self.margin['lost_rate']))
         print('元値:'+str(self.order['price'])+'損切ライン:'+str(val))
         return val
 
-    # @numba.jit()
+    @numba.jit()
     def MakingProfitLine_S(self):
         val = self.order['price']-(self.margin['profit']+(self.order['price']*self.margin['profit_rate']))
         print('元値:'+str(self.order['price'])+'利確ライン:'+str(val))
         return val
 
-    # @numba.jit()
+    @numba.jit()
     def MakingStopLine_S(self):
         val = self.order['price']+(self.margin['lost']+(self.order['price']*self.margin['lost_rate']))
         print('元値:'+str(self.order['price'])+'損切ライン:'+str(val))
@@ -88,7 +88,7 @@ class BackTester():
         self.margin = {
             "order": 0,          # margin price for order
             "order_cancel": 10,
-            "profit": 35,        # unit = $
+            "profit": 22,        # unit = $
             "profit_rate": 0,    # unit = [100%]
             "lost": 25,          # unit = $
             "lost_rate": 0,      # unit = [100%]
@@ -157,6 +157,8 @@ class BackTester():
             current['time'] = i
             print(current['time'])
             current['price'] = v['close']
+            current['high'] = v['high']
+            current['low'] = v['low']
             current['open'] = v['open']
             current['close'] = v['close']
             current['volume'] = v['volume_avg']
@@ -166,40 +168,13 @@ class BackTester():
             current['div_long'] = v['div_long']
             current['simple_vol'] = v['volume']
 
-            #    print ('Time:' + str(i))
-            #    print ('Pos:' + str(current['pos']))
-            #    print ('Money:' + str(self.money))
             print('Vol' + str(current['volume']))
 
             if current['pos'] == 'none':
                 current = self.entry_decider(current)
 
-            # elif current['pos'] == 'bought_w':               #買いポジエントリーまちの時
-            #     if self.order['price'] > current['price']:
-            #         self.order['size'] = self.money / current['price']
-            #         self.order['profitline'] = self.MakingProfitLine_B()
-            #         self.order['stopline'] = self.MakingStopLine_B()
-            #         self.counter['bpos'] += 1
-            #         current['pos'] = 'bought'
-            #         self.money = self.money - (self.order['size'] * self.order['price'])
-            #     if self.order['price_cancel_entry'] < current['price']:
-            #         current['pos'] = 'none'
-            #         print('買いポジエントリー待ちキャンセル')
-            #
-            # elif current['pos'] == 'sold_w':               #売りポジエントリーまちの時
-            #     if self.order['price'] < current['price']:
-            #         self.order['size'] = self.money / current['price']
-            #         self.order['profitline'] = self.MakingProfitLine_S()
-            #         self.order['stopline'] = self.MakingStopLine_S()
-            #         current['pos'] = 'sold'
-            #         self.counter['spos'] += 1
-            #         self.money = self.money + (self.order['size'] * self.order['price'])
-            #     if self.order['price_cancel_entry'] > current['price']:
-            #         current['pos'] = 'none'
-            #         print('売りポジエントリー待ちキャンセル')
-
             elif current['pos'] == 'bought':                #買いポジ持ってるとき
-                if self.order['profitline'] < current['price']:   #利確
+                if (self.order['profitline'] < current['price']) or (self.order['profitline'] < current['high']):  # 利確
                     print('買いポジ利確/利確ライン:'+str(self.order['profitline'])+'現在値:'+str(current['price'])+'エントリー:'+str(self.order['price']))
                     current['pos'] = 'none'
                     self.counter['bposprofit'] += 1
@@ -209,7 +184,7 @@ class BackTester():
                     account = account.append(series, ignore_index=True)
                     profitseries = pd.Series([current['time'], current['price']], index=profitdate.columns)
                     profitdate = profitdate.append(profitseries, ignore_index=True)
-                elif self.order['stopline'] > current['price']:   #損切り
+                elif (self.order['stopline'] > current['price']) or (self.order['stopline'] > current['low']):   # 損切り
                     print('買いポジ損切/損切ライン:'+str(self.order['stopline'])+'現在値:'+str(current['price'])+'エントリー:'+str(self.order['price']))
                     current['pos'] = 'none'
                     self.counter['bposlost'] += 1
@@ -221,7 +196,7 @@ class BackTester():
                     lostdate = lostdate.append(lostseries, ignore_index=True)
 
             elif current['pos'] == 'sold':  # 売りポジ持ってるとき
-                if self.order['profitline'] > current['price']:   #利確
+                if (self.order['profitline'] > current['price']) or (self.order['profitline'] > current['low']):   # 利確
                     print('売りポジ利確/利確ライン:'+str(self.order['profitline'])+'現在値:'+str(current['price'])+'エントリー:'+str(self.order['price']))
                     current['pos'] = 'none'
                     self.counter['sposprofit'] += 1
@@ -231,7 +206,7 @@ class BackTester():
                     account = account.append(series, ignore_index=True)
                     profitseries = pd.Series([current['time'], current['price']], index=profitdate.columns)
                     profitdate = profitdate.append(profitseries, ignore_index=True)
-                elif self.order['stopline'] < current['price']:   #損切り
+                elif (self.order['stopline'] < current['price']) or (self.order['stopline'] < current['high']):   # 損切り
                     print('売りポジ損切/損切ライン:'+str(self.order['stopline'])+'現在値:'+str(current['price'])+'エントリー:'+str(self.order['price']))
 
                     current['pos'] = 'none'
